@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.matheusdev.workshopmongo.dto.UserDTO;
 import com.matheusdev.workshopmongo.entities.User;
 import com.matheusdev.workshopmongo.repository.UserRepository;
+import com.matheusdev.workshopmongo.services.exception.DatabaseException;
 import com.matheusdev.workshopmongo.services.exception.ObjectNotFoundException;
 
 @Service
@@ -33,5 +35,17 @@ public class UserService {
 	
 	public User fromDTO(UserDTO objDto) {
 		return new User(objDto.getId(), objDto.getName(), objDto.getEmail());
+	}
+	
+	public void delete(String id) {
+		try {
+	        if (repository.existsById(id)) {
+	            repository.deleteById(id);			
+	        } else {				
+	            throw new ObjectNotFoundException("Object not found");			
+	        }		
+	    } catch (DataIntegrityViolationException e) {			
+	        throw new DatabaseException(e.getMessage());		
+	    }	
 	}
 }
